@@ -39,6 +39,8 @@ wget -O - $mirror/dists/$release/main/binary-armhf/Packages.bz2 | bunzip2 -c >> 
 echo "Searching for required packages..."
 while read k v
 do
+        current_package=
+        current_filename=
     if [ "$k" = "Package:" ]; then
         current_package=$v
     fi
@@ -47,20 +49,19 @@ do
         current_filename=$v
     fi
 
-    if [ "$k" = "" ]; then
+    if [ ! -z "$current_package" ] && [ ! -z "$current_filename" ]; then
         if required $current_package; then
             printf "  %-32s %s\n" $current_package `basename $current_filename`
             packages_debs="${mirror}${current_filename} ${packages_debs}"
             packages_found="$current_package $packages_found"
+            echo $packages_found
             allfound && break
         fi
 
-        current_package=
-        current_filename=
     fi
 done < Packages
-
 allfound || exit
-
+echo toto
+echo $packages_debs
 wget $packages_debs
 cd ..
